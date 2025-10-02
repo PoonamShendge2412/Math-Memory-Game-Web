@@ -6,6 +6,63 @@
     <title>Unity WebGL Player | Unity-Memory-Game</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+	<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+  // Your Firebase project config (replace with your project’s values)
+  const firebaseConfig = {
+  apiKey: "AIzaSyCV_F-8qheo_IhFF_ZRSkKatf0-O72cuvs",
+  authDomain: "metamersive-beta.firebaseapp.com",
+  projectId: "metamersive-beta",
+  storageBucket: "metamersive-beta.appspot.com",
+  messagingSenderId: "64124456719",
+  appId: "1:64124456719:web:c7e5957c1822e02778387a",
+  measurementId: "G-W07CXPEE7Y"
+};
+
+  // Initialize Firebase + Firestore
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore(app);
+</script>
+<script>
+mergeInto(LibraryManager.library, {
+  SaveScoreJS: function(playerNamePtr, score) {
+    var playerName = UTF8ToString(playerNamePtr);
+    var scoreValue = score;
+
+    db.collection("leaderboard").doc(playerName).set({
+      name: playerName,
+      score: scoreValue
+    }).then(() => {
+      console.log(" Score saved:", playerName, scoreValue);
+      SendMessage("LeaderboardManager", "OnSaveComplete");
+    }).catch((err) => {
+      console.error(" Save failed", err);
+    });
+  },
+
+  GetLeaderboardJS: function() {
+    db.collection("leaderboard")
+      .orderBy("score", "desc")
+      .limit(10)
+      .get()
+      .then((querySnapshot) => {
+        let data = [];
+        querySnapshot.forEach((doc) => {
+          let d = doc.data();
+          data.push(d.name + " : " + d.score);
+        });
+        let result = data.join(",");
+        SendMessage("LeaderboardManager", "OnLeaderboardData", result);
+      })
+      .catch((err) => {
+        console.error(" Load failed", err);
+      });
+  }
+});
+</script>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
