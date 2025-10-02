@@ -23,27 +23,29 @@
 };
 
   // Initialize Firebase + Firestore
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore(app);
-</script>
-<script>
-mergeInto(LibraryManager.library, {
-  SaveScoreJS: function(playerNamePtr, score) {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  window.SaveScoreJS = function(playerNamePtr, score) {
     var playerName = UTF8ToString(playerNamePtr);
+    if (!playerName) {
+      console.error("Empty playerName, skipping save");
+      return;
+    }
     var scoreValue = score;
 
     db.collection("leaderboard").doc(playerName).set({
       name: playerName,
       score: scoreValue
     }).then(() => {
-      console.log(" Score saved:", playerName, scoreValue);
+      console.log("Score saved:", playerName, scoreValue);
       SendMessage("LeaderboardManager", "OnSaveComplete");
     }).catch((err) => {
-      console.error(" Save failed", err);
+      console.error("Save failed", err);
     });
-  },
+  };
 
-  GetLeaderboardJS: function() {
+  window.GetLeaderboardJS = function() {
     db.collection("leaderboard")
       .orderBy("score", "desc")
       .limit(10)
@@ -58,10 +60,9 @@ mergeInto(LibraryManager.library, {
         SendMessage("LeaderboardManager", "OnLeaderboardData", result);
       })
       .catch((err) => {
-        console.error(" Load failed", err);
+        console.error("Load failed", err);
       });
-  }
-});
+  };
 </script>
   </head>
   <body>
