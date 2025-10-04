@@ -81,6 +81,27 @@
         <div id="unity-build-title">Unity-Memory-Game</div>
       </div>
     </div>
+	<input id="hiddenInput"
+           type="text"
+           style="position:fixed;top:-100px;opacity:0;z-index:-1;" />
+
+    <script>
+      // Bridge to trigger iOS keyboard
+      function FocusHiddenInput(unityObjName, methodName) {
+        const input = document.getElementById('hiddenInput');
+        input.value = "";
+        input.focus();
+
+        input.oninput = () => {
+          if (window.unityInstance) {
+            window.unityInstance.SendMessage(unityObjName, methodName, input.value);
+          }
+        };
+        input.onblur = () => {
+          input.oninput = null;
+        };
+      }
+    </script>
     <script>
 
       var container = document.querySelector("#unity-container");
